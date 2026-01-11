@@ -14,8 +14,6 @@ router.get('/stats', transactionController.getTransactionStats);
 // --- GET TRANSACTION BY ID ---
 router.get('/:id', transactionController.getTransactionById);
 
-// --- GET TRANSACTION BY TRANSACTION NUMBER ---
-router.get('/number/:transaction_number', transactionController.getTransactionByNumber);
 
 // --- GET TRANSACTION BY USER ID ---
 router.get('/user/:user_id', transactionController.getTransactionByUserId);

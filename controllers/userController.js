@@ -3,84 +3,75 @@ const User = require('../models/User');
 
 // --- REGISTER USER ---
 exports.register = async (req, res) => {
-    try {
-        const { username, password, role, email, fullname } = req.body;
+  try {
+    const { username, email, password, role } = req.body;
 
-        // Validasi input
-        if (!username || !password) {
-            return res.status(400).json({ msg: "Username dan password harus diisi!" });
-        }
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Cek username kembar
-        const existingUser = await User.findOne({ where: { username } });
-        if (existingUser) {
-            return res.status(400).json({ msg: "Username sudah dipakai!" });
-        }
+    const user = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+      role
+    });
 
-        // Hash Password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+    res.json({
+      status: true,
+      message: 'Register berhasil',
+      user
+    });
 
-        const newUser = await User.create({
-            username,
-            password: hashedPassword,
-            role: role || 'user',
-            email,
-            fullname
-        });
-
-        const responseData = newUser.toJSON();
-        delete responseData.password;
-
-        res.status(201).json({
-            msg: "User berhasil dibuat",
-            data: responseData
-        });
-
-    } catch (error) {
-        console.log("ERROR REGISTER:", error);
-        res.status(500).json({ msg: "Gagal Register", error: error.message });
-    }
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      msg: error.message
+    });
+  }
 };
 
 // --- LOGIN USER ---
 exports.login = async (req, res) => {
-    try {
-        const { username, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-        if (!username || !password) {
-            return res.status(400).json({ msg: "Username dan password harus diisi!" });
-        }
-
-        // Cari User
-        const user = await User.findOne({ where: { username } });
-
-        if (!user) {
-            return res.status(404).json({ msg: "Username tidak ditemukan" });
-        }
-
-        // Cek Password
-        const isMatch = await bcrypt.compare(password, user.password);
-
-        if (!isMatch) {
-            return res.status(400).json({ msg: "Password Salah" });
-        }
-
-        res.json({
-            msg: "Login Berhasil",
-            data: {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-                role: user.role,
-                fullname: user.fullname
-            }
-        });
-
-    } catch (error) {
-        console.log("ERROR LOGIN:", error);
-        res.status(500).json({ msg: error.message });
+    if (!email || !password) {
+      return res.status(400).json({
+        status: false,
+        msg: 'Email dan password harus diisi!'
+      });
     }
+
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        msg: 'User tidak ditemukan'
+      });
+    }
+
+    // 🔐 COMPARE HASH
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        status: false,
+        msg: 'Password salah'
+      });
+    }
+
+    res.json({
+      status: true,
+      message: 'Login berhasil',
+      user
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      msg: error.message
+    });
+  }
 };
 
 // --- GET ALL USERS (Admin Only) ---

@@ -20,19 +20,6 @@ const Transaction = db.define('transactions', {
         defaultValue: 'pending',
         allowNull: false
     },
-    transaction_number: {
-        type: DataTypes.STRING,
-        unique: true,
-        allowNull: false
-    },
-    notes: {
-        type: DataTypes.TEXT,
-        allowNull: true
-    },
-    paid_at: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
     createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
