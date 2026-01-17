@@ -5,33 +5,44 @@ const { Op } = require('sequelize');
 // --- CREATE PRODUCT ---
 exports.createProduct = async (req, res) => {
     try {
-        const { name, price, stock, description, category } = req.body;
+        const { name, price, description, category, stock } = req.body;
 
-        // 🔥 Ambil seller_id dari JWT (Middleware verifyToken)
-        const seller_id = req.user.id;
+        if (!name || !price || !stock) {
+            return res.status(400).json({
+                status: false,
+                message: "Name, price, dan stock wajib diisi"
+            });
+        }
+
+        const imagePath = req.file
+            ? `/uploads/${req.file.filename}`
+            : null;
 
         const product = await Product.create({
             name,
-            price,
-            stock,
+            price: parseInt(price),
             description,
             category,
-            seller_id
+            stock: parseInt(stock),
+            image: imagePath,
+            seller_id: req.user.id,
+            is_active: true
         });
 
-        res.json({
+        res.status(201).json({
             status: true,
             message: "Produk berhasil ditambahkan",
             data: product
         });
-
     } catch (error) {
+        console.error("CREATE PRODUCT ERROR:", error);
         res.status(500).json({
             status: false,
             message: error.message
         });
     }
 };
+
 
 // --- GET ALL PRODUCTS ---
 exports.getAllProducts = async (req, res) => {

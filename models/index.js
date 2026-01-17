@@ -37,6 +37,27 @@ Object.keys(db).forEach(modelName => {
   }
 });
 
+Cart.belongsTo(Product, {
+  foreignKey: 'product_id',
+  as: 'product'
+});
+
+Product.hasMany(Cart, {
+  foreignKey: 'product_id',
+  as: 'carts'
+});
+
+Cart.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+User.hasMany(Cart, {
+  foreignKey: 'user_id',
+  as: 'cart'
+});
+
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

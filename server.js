@@ -38,6 +38,17 @@ app.use(express.json());
     }
 })();
 
+User.hasMany(Product, { foreignKey: 'seller_id' });
+Product.belongsTo(User, { foreignKey: 'seller_id' });
+
+User.hasMany(Order, { foreignKey: 'user_id' });
+Order.belongsTo(User, { foreignKey: 'user_id' });
+
+Order.hasOne(Transaction, { foreignKey: 'order_id' });
+Transaction.belongsTo(Order, { foreignKey: 'order_id' });
+
+db.sync({ alter: true }).then(() => console.log('Database synced with relations'));
+
 // ================= ROUTES =================
 
 // Gunakan User Routes
@@ -55,7 +66,9 @@ app.use('/api/orders', orderRoutes);
 // Gunakan Transaction Routes
 app.use('/api/transactions', transactionRoutes);
 
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.listen(3000, '0.0.0.0', () => {
     console.log('Server running on port 3000');
